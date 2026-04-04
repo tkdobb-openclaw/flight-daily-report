@@ -28,6 +28,9 @@ function bindEvents() {
     
     // 导出PDF
     document.getElementById('exportBtn').addEventListener('click', exportCurrentPDF);
+    
+    // 删除图片
+    document.getElementById('deleteImageBtn').addEventListener('click', deleteImage);
 }
 
 // 计算飞行时长
@@ -56,16 +59,26 @@ function calculateDuration() {
 function handleImagePreview(e) {
     const file = e.target.files[0];
     const preview = document.getElementById('imagePreview');
+    const deleteBtn = document.getElementById('deleteImageBtn');
     
     if (file) {
         const reader = new FileReader();
         reader.onload = function(event) {
             preview.innerHTML = `<img src="${event.target.result}" alt="轨迹预览">`;
+            deleteBtn.style.display = 'inline-block';
         };
         reader.readAsDataURL(file);
     } else {
         preview.innerHTML = '';
+        deleteBtn.style.display = 'none';
     }
+}
+
+// 删除图片
+function deleteImage() {
+    document.getElementById('trackImage').value = '';
+    document.getElementById('imagePreview').innerHTML = '';
+    document.getElementById('deleteImageBtn').style.display = 'none';
 }
 
 // 提交表单
@@ -107,6 +120,7 @@ function handleSubmit(e) {
     document.getElementById('date').value = currentDate;
     document.getElementById('company').value = '朝阳通航（太湖）';
     document.getElementById('imagePreview').innerHTML = '';
+    document.getElementById('deleteImageBtn').style.display = 'none';
 }
 
 // 保存报告
@@ -165,6 +179,10 @@ function viewReport(id) {
     
     if (report.trackImage) {
         document.getElementById('imagePreview').innerHTML = `<img src="${report.trackImage}" alt="轨迹图">`;
+        document.getElementById('deleteImageBtn').style.display = 'inline-block';
+    } else {
+        document.getElementById('imagePreview').innerHTML = '';
+        document.getElementById('deleteImageBtn').style.display = 'none';
     }
     
     window.scrollTo({ top: 0, behavior: 'smooth' });
