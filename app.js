@@ -211,13 +211,32 @@ function exportCurrentPDF() {
     const date = document.getElementById('date').value;
     const pilot = document.getElementById('pilot').value;
     
+    // 添加临时样式避免空白页
+    element.classList.add('pdf-export');
+    
     const opt = {
-        margin: 10,
+        margin: [10, 10, 10, 10],
         filename: `飞行日报_${date}_${pilot || '未命名'}.pdf`,
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2 },
-        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        image: { type: 'jpeg', quality: 0.95 },
+        html2canvas: { 
+            scale: 2,
+            useCORS: true,
+            letterRendering: true
+        },
+        jsPDF: { 
+            unit: 'mm', 
+            format: 'a4', 
+            orientation: 'portrait',
+            compress: true
+        },
+        pagebreak: {
+            mode: ['avoid-all', 'css', 'legacy'],
+            before: '.page-break',
+            avoid: '.form-section, .image-preview, h2'
+        }
     };
     
-    html2pdf().set(opt).from(element).save();
+    html2pdf().set(opt).from(element).save().then(() => {
+        element.classList.remove('pdf-export');
+    });
 }

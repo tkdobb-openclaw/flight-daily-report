@@ -388,7 +388,61 @@ tbody tr:hover {
     color: #856404;
 }
 
-@media (max-width: 768px) {
+/* PDF 打印优化 */
+@media print {
+    body {
+        background: white;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+    
+    .container {
+        max-width: 100%;
+        padding: 10px;
+    }
+    
+    header {
+        border-radius: 0;
+        margin-bottom: 15px;
+        page-break-after: avoid;
+    }
+    
+    nav {
+        display: none;
+    }
+    
+    .form-section {
+        box-shadow: none;
+        border: 1px solid #ddd;
+        page-break-inside: avoid;
+        margin-bottom: 15px;
+        padding: 15px;
+    }
+    
+    .form-actions,
+    .recent-reports,
+    #deleteImageBtn {
+        display: none !important;
+    }
+    
+    .image-preview {
+        border: 1px solid #ddd;
+        page-break-inside: avoid;
+    }
+    
+    .image-preview img {
+        max-height: 150px;
+    }
+}
+
+/* 页面分页控制 */
+.page-break {
+    page-break-before: always;
+}
+
+.no-break {
+    page-break-inside: avoid;
+}
     .container {
         padding: 10px;
     }
