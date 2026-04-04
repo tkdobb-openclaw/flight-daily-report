@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>飞行日报看板</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📊 飞行日报统计看板</h1>
+            <nav>
+                <a href="index.html">录入</a>
+                <a href="dashboard.html" class="active">看板</a>
+            </nav>
+        </header>
+
+        <main>
+            <div class="filter-bar">
+                <div class="filter-group">
+                    <label>统计周期：</label>
+                    <select id="filterYear">
+                        <option value="all">全部年份</option>
+                    </select>
+                    <select id="filterMonth">
+                        <option value="all">全年</option>
+                        <option value="1">1月</option>
+                        <option value="2">2月</option>
+                        <option value="3">3月</option>
+                        <option value="4">4月</option>
+                        <option value="5">5月</option>
+                        <option value="6">6月</option>
+                        <option value="7">7月</option>
+                        <option value="8">8月</option>
+                        <option value="9">9月</option>
+                        <option value="10">10月</option>
+                        <option value="11">11月</option>
+                        <option value="12">12月</option>
+                    </select>
+                    <button id="applyFilter" class="btn btn-small">应用</button>
+                </div>
+                <div class="filter-group">
+                    <button id="exportAllPdf" class="btn btn-primary">📄 导出全部报表PDF</button>
+                    <button id="exportJson" class="btn btn-secondary">⬇️ 导出数据JSON</button>
+                </div>
+            </div>
+
+            <div class="stats-cards">
+                <div class="stat-card">
+                    <div class="stat-value" id="totalFlights">0</div>
+                    <div class="stat-label">飞行次数</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="totalHours">0</div>
+                    <div class="stat-label">飞行时长(小时)</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="totalPilots">0</div>
+                    <div class="stat-label">飞行员数</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="totalAreas">0</div>
+                    <div class="stat-label">巡查区域</div>
+                </div>
+            </div>
+
+            <div class="charts-grid">
+                <div class="chart-container">
+                    <h3>月度飞行趋势</h3>
+                    <div id="monthlyChart" style="height: 300px;"></div>
+                </div>
+                <div class="chart-container">
+                    <h3>飞行员任务分布</h3>
+                    <div id="pilotChart" style="height: 300px;"></div>
+                </div>
+                <div class="chart-container">
+                    <h3>巡查区域分布</h3>
+                    <div id="areaChart" style="height: 300px;"></div>
+                </div>
+                <div class="chart-container">
+                    <h3>巡查状态统计</h3>
+                    <div id="statusChart" style="height: 300px;"></div>
+                </div>
+            </div>
+
+            <div class="data-table-section">
+                <h3>📋 详细数据</h3>
+                <div id="dataTableContainer">
+                    <table id="dataTable">
+                        <thead>
+                            <tr>
+                                <th>日期</th>
+                                <th>飞行员</th>
+                                <th>区域</th>
+                                <th>时间</th>
+                                <th>时长</th>
+                                <th>状态</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dataTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="dashboard.js"></script>
+</body>
+</html>

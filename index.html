@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>飞行日报录入系统</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🚁 朝阳通航飞行日报录入</h1>
+            <nav>
+                <a href="index.html" class="active">录入</a>
+                <a href="dashboard.html">看板</a>
+            </nav>
+        </header>
+
+        <main>
+            <form id="dailyReportForm">
+                <div class="form-section">
+                    <h2>基本信息</h2>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="date">日期 *</label>
+                            <input type="date" id="date" name="date" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="company">公司名称</label>
+                            <input type="text" id="company" name="company" value="朝阳通航（太湖）">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h2>飞行信息</h2>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="pilot">飞行员 *</label>
+                            <input type="text" id="pilot" name="pilot" placeholder="例如：许梦渊" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="aircraft">航空器登记号 *</label>
+                            <input type="text" id="aircraft" name="aircraft" placeholder="例如：B-12W8" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="area">巡查区域 *</label>
+                            <input type="text" id="area" name="area" placeholder="例如：太湖宜兴" required>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h2>作业时间</h2>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="startTime">开始时间 *</label>
+                            <input type="time" id="startTime" name="startTime" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="endTime">结束时间 *</label>
+                            <input type="time" id="endTime" name="endTime" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="duration">飞行时长</label>
+                            <input type="text" id="duration" name="duration" readonly>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h2>巡查轨迹</h2>
+                    <div class="form-group">
+                        <label for="trackImage">上传轨迹图片</label>
+                        <input type="file" id="trackImage" name="trackImage" accept="image/*">
+                        <div id="imagePreview" class="image-preview"></div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h2>巡查情况</h2>
+                    <div class="form-group">
+                        <label for="patrolStatus">巡查状态 *</label>
+                        <select id="patrolStatus" name="patrolStatus" required>
+                            <option value="">请选择</option>
+                            <option value="正常">正常</option>
+                            <option value="发现异常">发现异常</option>
+                            <option value="其他">其他</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="patrolDetail">巡查详情 *</label>
+                        <textarea id="patrolDetail" name="patrolDetail" rows="3" placeholder="例如：正常运输用途，无可疑船只及人员" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="handleStatus">处置情况</label>
+                        <select id="handleStatus" name="handleStatus">
+                            <option value="无需处置">无需处置</option>
+                            <option value="已处置">已处置</option>
+                            <option value="待跟进">待跟进</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="handleDetail">处置详情</label>
+                        <textarea id="handleDetail" name="handleDetail" rows="2" placeholder="如有处置请填写详情"></textarea>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h2>备注</h2>
+                    <div class="form-group">
+                        <textarea id="remarks" name="remarks" rows="2" placeholder="其他备注信息"></textarea>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">💾 保存日报</button>
+                    <button type="button" id="exportBtn" class="btn btn-secondary">📄 导出PDF</button>
+                    <button type="reset" class="btn btn-light">清空</button>
+                </div>
+            </form>
+
+            <div id="recentReports" class="recent-reports">
+                <h2>📋 最近提交的日报</h2>
+                <div id="reportsList"></div>
+            </div>
+        </main>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
