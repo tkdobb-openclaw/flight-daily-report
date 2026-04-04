@@ -211,32 +211,40 @@ function exportCurrentPDF() {
     const date = document.getElementById('date').value;
     const pilot = document.getElementById('pilot').value;
     
-    // 添加临时样式避免空白页
-    element.classList.add('pdf-export');
+    // 克隆表单用于PDF导出（避免影响原页面）
+    const clone = element.cloneNode(true);
+    clone.style.width = '210mm';
+    clone.style.padding = '10mm';
+    clone.style.background = 'white';
+    clone.style.position = 'absolute';
+    clone.style.left = '-9999px';
+    clone.style.top = '0';
+    document.body.appendChild(clone);
+    
+    // 隐藏按钮
+    const buttons = clone.querySelectorAll('button, .recent-reports, nav');
+    buttons.forEach(btn => btn.style.display = 'none');
     
     const opt = {
-        margin: [10, 10, 10, 10],
+        margin: 0,
         filename: `飞行日报_${date}_${pilot || '未命名'}.pdf`,
         image: { type: 'jpeg', quality: 0.95 },
         html2canvas: { 
             scale: 2,
             useCORS: true,
-            letterRendering: true
+            scrollY: 0,
+            scrollX: 0,
+            windowWidth: clone.scrollWidth,
+            windowHeight: clone.scrollHeight
         },
         jsPDF: { 
             unit: 'mm', 
             format: 'a4', 
-            orientation: 'portrait',
-            compress: true
-        },
-        pagebreak: {
-            mode: ['avoid-all', 'css', 'legacy'],
-            before: '.page-break',
-            avoid: '.form-section, .image-preview, h2'
+            orientation: 'portrait'
         }
     };
     
-    html2pdf().set(opt).from(element).save().then(() => {
-        element.classList.remove('pdf-export');
+    html2pdf().set(opt).from(clone).save().then(() => {
+        document.body.removeChild(clone);
     });
 }
