@@ -280,18 +280,117 @@ function updateDataTable(reports) {
 }
 
 // 导出看板PDF
-function exportDashboardPDF() {
-    const element = document.querySelector('main');
+async function exportDashboardPDF() {
+    // 获取图表的DataURL
+    const monthlyDataUrl = monthlyChart.getDataURL({ type: 'png', pixelRatio: 2 });
+    const pilotDataUrl = pilotChart.getDataURL({ type: 'png', pixelRatio: 2 });
+    const areaDataUrl = areaChart.getDataURL({ type: 'png', pixelRatio: 2 });
+    const statusDataUrl = statusChart.getDataURL({ type: 'png', pixelRatio: 2 });
+    
+    // 创建导出容器
+    const exportContainer = document.createElement('div');
+    exportContainer.style.cssText = `
+        position: fixed;
+        left: -9999px;
+        top: 0;
+        width: 297mm;
+        background: white;
+        padding: 15mm;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    `;
+    
+    // 获取统计数据
+    const reports = getFilteredReports();
+    const totalFlights = reports.length;
+    let totalMinutes = 0;
+    reports.forEach(r => {
+        if (r.duration) {
+            const match = r.duration.match(/(\d+)小时(\d+)分钟/);
+            if (match) {
+                totalMinutes += parseInt(match[1]) * 60 + parseInt(match[2]);
+            }
+        }
+    });
+    const pilots = new Set(reports.map(r => r.pilot).filter(Boolean));
+    const areas = new Set(reports.map(r => r.area).filter(Boolean));
+    
+    // 构建PDF内容
+    exportContainer.innerHTML = `
+        <div style="text-align: center; margin-bottom: 20px;">
+            <h1 style="font-size: 24px; margin: 0 0 10px 0; color: #333;">🚁 飞行日报统计报表</h1>
+            <p style="color: #666; margin: 0;">生成时间：${new Date().toLocaleString()}</p>
+        </div>
+        
+        <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
+            <div style="text-align: center; padding: 15px; background: #f5f5f5; border-radius: 8px; flex: 1; margin: 0 5px;">
+                <div style="font-size: 28px; font-weight: bold; color: #667eea;">${totalFlights}</div>
+                <div style="color: #666; font-size: 12px;">飞行次数</div>
+            </div>
+            <div style="text-align: center; padding: 15px; background: #f5f5f5; border-radius: 8px; flex: 1; margin: 0 5px;">
+                <div style="font-size: 28px; font-weight: bold; color: #667eea;">${(totalMinutes / 60).toFixed(1)}</div>
+                <div style="color: #666; font-size: 12px;">飞行时长(小时)</div>
+            </div>
+            <div style="text-align: center; padding: 15px; background: #f5f5f5; border-radius: 8px; flex: 1; margin: 0 5px;">
+                <div style="font-size: 28px; font-weight: bold; color: #667eea;">${pilots.size}</div>
+                <div style="color: #666; font-size: 12px;">飞行员数</div>
+            </div>
+            <div style="text-align: center; padding: 15px; background: #f5f5f5; border-radius: 8px; flex: 1; margin: 0 5px;">
+                <div style="font-size: 28px; font-weight: bold; color: #667eea;">${areas.size}</div>
+                <div style="color: #666; font-size: 12px;">巡查区域</div>
+            </div>
+        </div>
+        
+        <div style="page-break-after: always;">
+            <h3 style="color: #333; border-bottom: 2px solid #667eea; padding-bottom: 8px;">月度飞行趋势</h3>
+            <img src="${monthlyDataUrl}" style="width: 100%; max-height: 250px; object-fit: contain;">
+        </div>
+        
+        <div style="page-break-after: always;">
+            <h3 style="color: #333; border-bottom: 2px solid #667eea; padding-bottom: 8px;">飞行员任务分布</h3>
+            <img src="${pilotDataUrl}" style="width: 100%; max-height: 250px; object-fit: contain;">
+        </div>
+        
+        <div style="page-break-after: always;">
+            <h3 style="color: #333; border-bottom: 2px solid #667eea; padding-bottom: 8px;">巡查区域分布</h3>
+            <img src="${areaDataUrl}" style="width: 100%; max-height: 250px; object-fit: contain;">
+        </div>
+        
+        <div>
+            <h3 style="color: #333; border-bottom: 2px solid #667eea; padding-bottom: 8px;">巡查状态统计</h3>
+            <img src="${statusDataUrl}" style="width: 100%; max-height: 250px; object-fit: contain;">
+        </div>
+    `;
+    
+    document.body.appendChild(exportContainer);
+    
+    // 等待图片加载
+    await new Promise(resolve => setTimeout(resolve, 500));
     
     const opt = {
-        margin: 10,
+        margin: [10, 10],
         filename: `飞行日报统计报表_${new Date().toLocaleDateString()}.pdf`,
         image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2 },
-        jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
+        html2canvas: { 
+            scale: 2,
+            useCORS: true,
+            logging: false
+        },
+        jsPDF: { 
+            unit: 'mm', 
+            format: 'a4', 
+            orientation: 'landscape'
+        },
+        pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
     };
     
-    html2pdf().set(opt).from(element).save();
+    try {
+        await html2pdf().set(opt).from(exportContainer).save();
+    } catch (error) {
+        console.error('PDF导出失败:', error);
+        alert('PDF导出失败，请重试');
+    } finally {
+        document.body.removeChild(exportContainer);
+    }
 }
 
 // 导出JSON数据

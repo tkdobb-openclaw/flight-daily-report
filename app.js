@@ -200,9 +200,7 @@ function deleteReport(id) {
 }
 
 // 导出当前表单为PDF
-function exportCurrentPDF() {
-    const element = document.getElementById('dailyReportForm');
-    
+async function exportCurrentPDF() {
     if (!document.getElementById('date').value) {
         alert('请先填写表单再导出');
         return;
@@ -211,19 +209,130 @@ function exportCurrentPDF() {
     const date = document.getElementById('date').value;
     const pilot = document.getElementById('pilot').value;
     
-    // 克隆表单用于PDF导出（避免影响原页面）
-    const clone = element.cloneNode(true);
-    clone.style.width = '210mm';
-    clone.style.padding = '10mm';
-    clone.style.background = 'white';
-    clone.style.position = 'absolute';
-    clone.style.left = '-9999px';
-    clone.style.top = '0';
-    document.body.appendChild(clone);
+    // 创建打印友好的容器
+    const printContainer = document.createElement('div');
+    printContainer.style.cssText = `
+        position: fixed;
+        left: -9999px;
+        top: 0;
+        width: 210mm;
+        min-height: 297mm;
+        background: white;
+        padding: 15mm;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        color: #333;
+    `;
     
-    // 隐藏按钮
-    const buttons = clone.querySelectorAll('button, .recent-reports, nav');
-    buttons.forEach(btn => btn.style.display = 'none');
+    // 获取表单数据
+    const formData = {
+        date: document.getElementById('date').value,
+        company: document.getElementById('company').value,
+        pilot: document.getElementById('pilot').value,
+        aircraft: document.getElementById('aircraft').value,
+        area: document.getElementById('area').value,
+        startTime: document.getElementById('startTime').value,
+        endTime: document.getElementById('endTime').value,
+        duration: document.getElementById('duration').value,
+        patrolStatus: document.getElementById('patrolStatus').value,
+        patrolDetail: document.getElementById('patrolDetail').value,
+        handleStatus: document.getElementById('handleStatus').value,
+        handleDetail: document.getElementById('handleDetail').value,
+        remarks: document.getElementById('remarks').value,
+        trackImage: document.getElementById('imagePreview').querySelector('img')?.src || null
+    };
+    
+    const statusColor = formData.patrolStatus === '正常' ? '#52c41a' : 
+                        formData.patrolStatus === '发现异常' ? '#f5222d' : '#faad14';
+    
+    // 构建PDF内容
+    printContainer.innerHTML = `
+        <div style="text-align: center; margin-bottom: 30px; border-bottom: 3px solid #667eea; padding-bottom: 15px;">
+            <h1 style="font-size: 28px; margin: 0 0 10px 0; color: #333;">🚁 飞行巡查日报</h1>
+            <p style="color: #666; margin: 0; font-size: 14px;">${formData.company}</p>
+        </div>
+        
+        <div style="margin-bottom: 20px;">
+            <table style="width: 100%; border-collapse: collapse;">
+                <tr style="background: #f8f9fa;">
+                    <td style="padding: 12px; border: 1px solid #ddd; width: 25%; font-weight: bold;">日期</td>
+                    <td style="padding: 12px; border: 1px solid #ddd; width: 25%;">${formData.date}</td>
+                    <td style="padding: 12px; border: 1px solid #ddd; width: 25%; font-weight: bold;">飞行员</td>
+                    <td style="padding: 12px; border: 1px solid #ddd; width: 25%;">${formData.pilot || '-'}</td>
+                </tr>
+                <tr>
+                    <td style="padding: 12px; border: 1px solid #ddd; font-weight: bold;">航空器登记号</td>
+                    <td style="padding: 12px; border: 1px solid #ddd;">${formData.aircraft || '-'}</td>
+                    <td style="padding: 12px; border: 1px solid #ddd; font-weight: bold;">巡查区域</td>
+                    <td style="padding: 12px; border: 1px solid #ddd;">${formData.area || '-'}</td>
+                </tr>
+                <tr style="background: #f8f9fa;">
+                    <td style="padding: 12px; border: 1px solid #ddd; font-weight: bold;">作业时间</td>
+                    <td style="padding: 12px; border: 1px solid #ddd;">${formData.startTime || '-'} ~ ${formData.endTime || '-'}</td>
+                    <td style="padding: 12px; border: 1px solid #ddd; font-weight: bold;">飞行时长</td>
+                    <td style="padding: 12px; border: 1px solid #ddd;">${formData.duration || '-'}</td>
+                </tr>
+                <tr>
+                    <td style="padding: 12px; border: 1px solid #ddd; font-weight: bold;">巡查状态</td>
+                    <td colspan="3" style="padding: 12px; border: 1px solid #ddd;">
+                        <span style="display: inline-block; padding: 4px 12px; border-radius: 4px; background: ${statusColor}; color: white; font-weight: bold;">${formData.patrolStatus || '-'}</span>
+                    </td>
+                </tr>
+            </table>
+        </div>
+        
+        <div style="margin-bottom: 20px;">
+            <h3 style="color: #667eea; border-left: 4px solid #667eea; padding-left: 10px; margin: 0 0 10px 0;">巡查详情</h3>
+            <div style="padding: 15px; background: #f8f9fa; border-radius: 8px; min-height: 60px;">
+                ${formData.patrolDetail || '无'}
+            </div>
+        </div>
+        
+        <div style="margin-bottom: 20px;">
+            <h3 style="color: #667eea; border-left: 4px solid #667eea; padding-left: 10px; margin: 0 0 10px 0;">处置情况</h3>
+            <div style="padding: 15px; background: #f8f9fa; border-radius: 8px;">
+                <strong>状态：</strong>${formData.handleStatus || '无需处置'}<br>
+                <strong>详情：</strong>${formData.handleDetail || '无'}
+            </div>
+        </div>
+        
+        ${formData.trackImage ? `
+        <div style="margin-bottom: 20px;">
+            <h3 style="color: #667eea; border-left: 4px solid #667eea; padding-left: 10px; margin: 0 0 10px 0;">巡查轨迹</h3>
+            <div style="text-align: center;">
+                <img src="${formData.trackImage}" style="max-width: 100%; max-height: 300px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+            </div>
+        </div>
+        ` : ''}
+        
+        ${formData.remarks ? `
+        <div style="margin-bottom: 20px;">
+            <h3 style="color: #667eea; border-left: 4px solid #667eea; padding-left: 10px; margin: 0 0 10px 0;">备注</h3>
+            <div style="padding: 15px; background: #f8f9fa; border-radius: 8px;">
+                ${formData.remarks}
+            </div>
+        </div>
+        ` : ''}
+        
+        <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #ddd; color: #999; font-size: 12px; text-align: center;">
+            生成时间：${new Date().toLocaleString()}
+        </div>
+    `;
+    
+    document.body.appendChild(printContainer);
+    
+    // 等待图片加载
+    if (formData.trackImage) {
+        await new Promise(resolve => {
+            const img = printContainer.querySelector('img');
+            if (img) {
+                img.onload = resolve;
+                img.onerror = resolve;
+                setTimeout(resolve, 1000);
+            } else {
+                resolve();
+            }
+        });
+    }
     
     const opt = {
         margin: 0,
@@ -234,8 +343,9 @@ function exportCurrentPDF() {
             useCORS: true,
             scrollY: 0,
             scrollX: 0,
-            windowWidth: clone.scrollWidth,
-            windowHeight: clone.scrollHeight
+            windowWidth: printContainer.scrollWidth,
+            windowHeight: printContainer.scrollHeight,
+            logging: false
         },
         jsPDF: { 
             unit: 'mm', 
@@ -244,7 +354,12 @@ function exportCurrentPDF() {
         }
     };
     
-    html2pdf().set(opt).from(clone).save().then(() => {
-        document.body.removeChild(clone);
-    });
+    try {
+        await html2pdf().set(opt).from(printContainer).save();
+    } catch (error) {
+        console.error('PDF导出失败:', error);
+        alert('PDF导出失败，请重试');
+    } finally {
+        document.body.removeChild(printContainer);
+    }
 }
