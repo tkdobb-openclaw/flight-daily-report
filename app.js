@@ -212,15 +212,18 @@ async function exportCurrentPDF() {
     // 创建打印友好的容器
     const printContainer = document.createElement('div');
     printContainer.style.cssText = `
-        position: fixed;
-        left: -9999px;
+        position: absolute;
         top: 0;
+        left: 0;
         width: 210mm;
         min-height: 297mm;
         background: white;
         padding: 15mm;
         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
         color: #333;
+        z-index: -9999;
+        opacity: 0;
+        pointer-events: none;
     `;
     
     // 获取表单数据

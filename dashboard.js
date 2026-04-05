@@ -290,13 +290,16 @@ async function exportDashboardPDF() {
     // 创建导出容器
     const exportContainer = document.createElement('div');
     exportContainer.style.cssText = `
-        position: fixed;
-        left: -9999px;
+        position: absolute;
         top: 0;
+        left: 0;
         width: 297mm;
         background: white;
         padding: 15mm;
         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        z-index: -9999;
+        opacity: 0;
+        pointer-events: none;
     `;
     
     // 获取统计数据
